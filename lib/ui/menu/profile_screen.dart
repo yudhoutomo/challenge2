@@ -1,4 +1,3 @@
-import 'dart:js';
 import 'dart:ui';
 
 import 'package:challenge2/core/widgets/app_button.dart';
