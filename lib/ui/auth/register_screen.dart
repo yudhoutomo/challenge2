@@ -29,7 +29,7 @@ class RegisterScreen extends StatelessWidget {
   Widget _header(BuildContext context) {
     return AppBar(
       toolbarHeight: 80,
-      title: Text("Register"),
+      title: Text("Register", style: TextStyle(color: Colors.black)),
       centerTitle: true,
       leading: IconButton(
         icon: Icon(Icons.arrow_back, color: Colors.black),
