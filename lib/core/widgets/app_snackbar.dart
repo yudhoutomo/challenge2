@@ -3,7 +3,7 @@ import 'package:flutter_screenutil/flutter_screenutil.dart';
 import 'package:challenge2/core/utils/theme_extension.dart';
 
 extension ShowSnackbar on BuildContext {
-  void showSnackbar(String message, {bool isPositive = false}) {
+  void showSnackbar(String message, bool bool, {bool isPositive = false}) {
     ScaffoldMessenger.maybeOf(this)?.showSnackBar(
       SnackBar(
         backgroundColor: Colors.transparent,

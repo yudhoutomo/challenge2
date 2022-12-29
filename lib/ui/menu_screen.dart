@@ -1,8 +1,13 @@
 import 'package:challenge2/core/widgets/app_colors.dart';
+import 'package:challenge2/di/injection.dart';
+import 'package:challenge2/ui/menu/note/note_add_screen.dart';
 import 'package:flutter/material.dart';
 import 'package:challenge2/core/utils/translation.dart';
+import 'package:flutter_bloc/flutter_bloc.dart';
+import 'package:go_router/go_router.dart';
 
-import 'menu/home_screen.dart';
+import 'cubit/cubit/cubit/note/cubit/note_cubit.dart';
+import 'menu/note/home_screen.dart';
 import 'menu/profile_screen.dart';
 
 class MenuScreen extends StatefulWidget {
@@ -54,11 +59,22 @@ class _MenuScreenState extends State<MenuScreen> {
         onTap: (index) => setState(() => currentScreen = index),
       ),
       floatingActionButton: FloatingActionButton(
-        onPressed: () {},
+        onPressed: () {
+          goToSecondScreen(context);
+        },
         backgroundColor: AppColors.green,
         child: Icon(Icons.add),
       ),
       floatingActionButtonLocation: FloatingActionButtonLocation.centerDocked,
     );
+  }
+
+  void goToSecondScreen(BuildContext _context) async {
+    var result = await Navigator.push(
+        _context,
+        new MaterialPageRoute(
+          builder: (BuildContext context) => new NoteAddScreen(),
+          fullscreenDialog: true,
+        )).whenComplete(() => {getIt<NoteCubit>()..getNote()});
   }
 }

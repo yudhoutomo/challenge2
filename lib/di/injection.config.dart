@@ -15,8 +15,13 @@ import '../core/data/datasource/api/user_api.dart' as _i9;
 import '../core/utils/media_service.dart' as _i6;
 import '../core/utils/permission_service.dart' as _i7;
 import '../core/utils/refresh_token_interceptor.dart' as _i8;
-import 'app_modules.dart' as _i11;
-import 'network_modules.dart' as _i10;
+import '../ui/cubit/cubit/cubit/addrequest/cubit/add_request_cubit.dart'
+    as _i10;
+import '../ui/cubit/cubit/cubit/login_cubit.dart' as _i11;
+import '../ui/cubit/cubit/cubit/note/cubit/note_cubit.dart' as _i12;
+import '../ui/cubit/cubit/cubit/profile/cubit/profile_cubit.dart' as _i13;
+import 'app_modules.dart' as _i15;
+import 'network_modules.dart' as _i14;
 
 const String _dev = 'dev';
 // ignore_for_file: unnecessary_lambdas
@@ -45,9 +50,16 @@ _i1.GetIt $initGetIt(
   gh.factory<_i8.RefreshTokenInterceptor>(
       () => _i8.RefreshTokenInterceptor(get<_i5.FlutterSecureStorage>()));
   gh.factory<_i9.UserApi>(() => _i9.UserApi(get<_i3.Dio>()));
+  gh.factory<_i10.AddRequestCubit>(
+      () => _i10.AddRequestCubit(get<_i9.UserApi>()));
+  gh.factory<_i10.AddRequestUpdateCubit>(
+      () => _i10.AddRequestUpdateCubit(get<_i9.UserApi>()));
+  gh.factory<_i11.LoginCubit>(() => _i11.LoginCubit(get<_i9.UserApi>()));
+  gh.factory<_i12.NoteCubit>(() => _i12.NoteCubit(get<_i9.UserApi>()));
+  gh.factory<_i13.ProfileCubit>(() => _i13.ProfileCubit(get<_i9.UserApi>()));
   return get;
 }
 
-class _$NetworkModule extends _i10.NetworkModule {}
+class _$NetworkModule extends _i14.NetworkModule {}
 
-class _$AppModule extends _i11.AppModule {}
+class _$AppModule extends _i15.AppModule {}

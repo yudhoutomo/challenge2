@@ -3,12 +3,16 @@ import 'dart:ui';
 import 'package:challenge2/core/widgets/app_button.dart';
 import 'package:challenge2/core/widgets/app_colors.dart';
 import 'package:challenge2/core/widgets/app_textfield.dart';
+import 'package:challenge2/di/injection.dart';
+import 'package:challenge2/gen/core/data/model/note/note/note.dart';
+import 'package:challenge2/ui/menu/note/note_update_screen.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:go_router/go_router.dart';
 
-import 'Note.dart';
+import '../../../core/utils/status.dart';
+import '../../cubit/cubit/cubit/note/cubit/note_cubit.dart';
 import 'item_note.dart';
 
 class HomeScreen extends StatelessWidget {
@@ -16,37 +20,32 @@ class HomeScreen extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    final notes = [
-      Note(
-          name: "Lorem Ipsum",
-          description:
-              "Lorem Ipsum is simply dummy text of the printing and typesetting industry. Lorem Ipsum has been the industry's standard dummy text ever since the 1500s, when an unknown printer took a galley"),
-      Note(
-          name: "Lorem",
-          description:
-              "Lorem Ipsum is simply dummy text of the printing and typesetting industry.")
-    ];
-
-    return SafeArea(
+    return BlocProvider(
+      create: (context) => getIt<NoteCubit>()..getNote(),
+      child: SafeArea(
         child: Scaffold(
-      appBar: const MyCustomAppBar(height: 120),
-      body: ListView.builder(
-          itemCount: notes.length,
-          itemBuilder: (BuildContext context, int index) => ItemNote(
-              data: notes[index],
-              onClick: (data) => context.push(
-                    '/detail',
-                    extra: notes[index],
-                  ))),
-
-      // Navigator.of(context).push(MaterialPageRoute(
-      // builder: (builder) => DetailScreen(data: data)))))
-
-      // floatingActionButton: FloatingActionButton(
-      //     backgroundColor: Colors.black,
-      //     child: Icon(Icons.add),
-      //     onPressed: () => {debugPrint('Clicked')}));
-    ));
+          appBar: const MyCustomAppBar(height: 120),
+          body: BlocBuilder<NoteCubit, NoteState>(
+            builder: (context, state) {
+              if (state is NoteInitialState && state.status == Status.success) {
+                final notes = state.data!;
+                return ListView.builder(
+                    itemCount: notes.length,
+                    itemBuilder: (BuildContext context, int index) => ItemNote(
+                        data: notes[index],
+                        onClick: (data) => goToSecondScreen(context, data)));
+                // context.push(
+                //     '/note_update',
+                //     extra: notes[index],
+                //   )));
+              } else {
+                return Text('Loading..');
+              }
+            },
+          ),
+        ),
+      ),
+    );
   }
 
   Widget _layout(BuildContext context) {
@@ -84,7 +83,8 @@ class HomeScreen extends StatelessWidget {
                     padding: EdgeInsets.all(12),
                     child: Container(
                       child: TextField(
-                        onChanged: (value) => {},
+                        onChanged: (value) =>
+                            context.read<NoteCubit>().filter(value),
                         // context.read<FlightCubit>().filter(value),
                         decoration: InputDecoration(
                             prefixIcon: Icon(Icons.search),
@@ -166,6 +166,15 @@ class HomeScreen extends StatelessWidget {
       ),
     );
   }
+
+  void goToSecondScreen(BuildContext _context, Note data) async {
+    var result = await Navigator.push(
+        _context,
+        new MaterialPageRoute(
+          builder: (BuildContext context) => new NoteUpdateScreen(data: data),
+          fullscreenDialog: true,
+        )).whenComplete(() => {_context.read<NoteCubit>()..getNote()});
+  }
 }
 
 class MyCustomAppBar extends StatelessWidget implements PreferredSizeWidget {
@@ -200,7 +209,8 @@ class MyCustomAppBar extends StatelessWidget implements PreferredSizeWidget {
                         padding: EdgeInsets.all(12),
                         child: Container(
                           child: TextField(
-                            onChanged: (value) => {},
+                            onChanged: (value) =>
+                                context.read<NoteCubit>().filter(value),
                             // context.read<FlightCubit>().filter(value),
                             decoration: InputDecoration(
                                 prefixIcon: Icon(Icons.search),

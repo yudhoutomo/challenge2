@@ -6,7 +6,14 @@ import 'package:challenge2/core/widgets/app_textfield.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
+import 'package:flutter_secure_storage/flutter_secure_storage.dart';
 import 'package:go_router/go_router.dart';
+
+import '../../core/config/config.dart';
+import '../../core/data/model/profile/profile/profile.dart';
+import '../../core/utils/status.dart';
+import '../../di/injection.dart';
+import '../cubit/cubit/cubit/profile/cubit/profile_cubit.dart';
 
 class ProfileScreen extends StatelessWidget {
   const ProfileScreen({super.key});
@@ -19,16 +26,29 @@ class ProfileScreen extends StatelessWidget {
   }
 
   Widget _layout(BuildContext context) {
-    return Container(
-        width: double.infinity,
-        height: double.infinity,
-        child: SafeArea(
-            child: Scaffold(
-          backgroundColor: Colors.white,
-          body: CustomScrollView(slivers: [
-            SliverToBoxAdapter(child: Column(children: [_body(context)]))
-          ]),
-        )));
+    return BlocProvider(
+      create: (context) => getIt<ProfileCubit>()..getUser(),
+      child: BlocBuilder<ProfileCubit, ProfileState>(
+        builder: (context, state) {
+          if (state is ProfileInitialState && state.status == Status.success) {
+            final profile = state.data!;
+            return Container(
+                width: double.infinity,
+                height: double.infinity,
+                child: SafeArea(
+                    child: Scaffold(
+                  backgroundColor: Colors.white,
+                  body: CustomScrollView(slivers: [
+                    SliverToBoxAdapter(
+                        child: Column(children: [_body(context, profile)]))
+                  ]),
+                )));
+          } else {
+            return Text('Loading..');
+          }
+        },
+      ),
+    );
   }
 
   Widget _header(BuildContext context) {
@@ -42,7 +62,7 @@ class ProfileScreen extends StatelessWidget {
     );
   }
 
-  Widget _body(BuildContext context) {
+  Widget _body(BuildContext context, Profile profile) {
     return Padding(
       padding: EdgeInsets.fromLTRB(20, 0, 20, 0),
       child: Column(
@@ -62,17 +82,16 @@ class ProfileScreen extends StatelessWidget {
                 SizedBox(height: 60),
                 CircleAvatar(
                   radius: 48, // Image radius
-                  // backgroundImage: NetworkImage(
-                  //     'https://pixabay.com/vectors/blank-profile-picture-mystery-man-973460/'),
+                  backgroundImage: NetworkImage(profile.photo),
                 ),
                 SizedBox(height: 13),
-                Text('Crocodic Developer',
+                Text(profile.name,
                     textAlign: TextAlign.left,
                     style: const TextStyle(
                         fontWeight: FontWeight.w600,
                         fontSize: 16,
                         color: Colors.black)),
-                Text('developer@crocodic.com',
+                Text(profile.email,
                     textAlign: TextAlign.left,
                     style: const TextStyle(
                         fontWeight: FontWeight.normal,
@@ -83,10 +102,9 @@ class ProfileScreen extends StatelessWidget {
           ),
           SizedBox(height: 60),
           GestureDetector(
-            onTap: () => {context.push('/register')},
+            onTap: () => {context.push('/edit_profile')},
             child: Container(
               child: Row(
-                // ignore: prefer_const_literals_to_create_immutables
                 children: [
                   Expanded(
                     flex: 1,
@@ -98,7 +116,6 @@ class ProfileScreen extends StatelessWidget {
                           color: Colors.black),
                     ),
                   ),
-                  // ignore: prefer_const_constructors
                   Icon(
                     Icons.person,
                     color: Color.fromARGB(255, 111, 109, 109),
@@ -109,30 +126,39 @@ class ProfileScreen extends StatelessWidget {
             ),
           ),
           SizedBox(height: 33),
-          Row(
-            // ignore: prefer_const_literals_to_create_immutables
-            children: [
-              Expanded(
-                flex: 1,
-                child: Text(
-                  'Logout',
-                  style: TextStyle(
-                      fontWeight: FontWeight.w500,
-                      fontSize: 18,
-                      color: Colors.black),
+          GestureDetector(
+              onTap: () => {setIsLogout(), context.go('/login')},
+              child: Container(
+                child: Row(
+                  // ignore: prefer_const_literals_to_create_immutables
+                  children: [
+                    Expanded(
+                      flex: 1,
+                      child: Text(
+                        'Logout',
+                        style: TextStyle(
+                            fontWeight: FontWeight.w500,
+                            fontSize: 18,
+                            color: Colors.black),
+                      ),
+                    ),
+                    // ignore: prefer_const_constructors
+                    Icon(
+                      Icons.logout,
+                      color: Colors.red,
+                      size: 30.0,
+                    ),
+                  ],
                 ),
-              ),
-              // ignore: prefer_const_constructors
-              Icon(
-                Icons.logout,
-                color: Colors.red,
-                size: 30.0,
-              ),
-            ],
-          ),
+              )),
           SizedBox(height: 20),
         ],
       ),
     );
+  }
+
+  Future<void> setIsLogout() async {
+    await getIt<FlutterSecureStorage>()
+        .write(key: Config.IS_LOGIN, value: null);
   }
 }

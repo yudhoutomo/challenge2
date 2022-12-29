@@ -1,6 +1,7 @@
 import 'dart:io';
 
 import 'package:flutter/foundation.dart';
+import 'package:flutter_easyloading/flutter_easyloading.dart';
 import 'package:flutter_screenutil/flutter_screenutil.dart';
 import 'package:hydrated_bloc/hydrated_bloc.dart';
 import 'package:path_provider/path_provider.dart';
@@ -18,6 +19,7 @@ import 'package:flutter_localizations/flutter_localizations.dart';
 import 'package:injectable/injectable.dart';
 
 void main() async {
+  configLoading();
   WidgetsFlutterBinding.ensureInitialized();
   await configureInjection(Environment.dev);
   SystemChrome.setSystemUIOverlayStyle(const SystemUiOverlayStyle(
@@ -33,6 +35,23 @@ void main() async {
     () => runApp(const App()),
     storage: storage,
   );
+}
+
+void configLoading() {
+  EasyLoading.instance
+    ..displayDuration = const Duration(milliseconds: 2000)
+    ..indicatorType = EasyLoadingIndicatorType.fadingCircle
+    ..loadingStyle = EasyLoadingStyle.dark
+    ..indicatorSize = 45.0
+    ..radius = 10.0
+    ..progressColor = Colors.yellow
+    ..backgroundColor = Colors.green
+    ..indicatorColor = Colors.yellow
+    ..textColor = Colors.yellow
+    ..maskColor = Colors.blue.withOpacity(0.5)
+    ..userInteractions = true
+    ..dismissOnTap = false;
+  //..customAnimation = CustomAnimation();
 }
 
 class App extends StatelessWidget {

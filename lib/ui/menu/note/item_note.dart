@@ -1,6 +1,7 @@
 import 'package:challenge2/core/widgets/app_colors.dart';
-import 'package:challenge2/ui/menu/Note.dart';
 import 'package:flutter/material.dart';
+
+import '../../../gen/core/data/model/note/note/note.dart';
 
 class ItemNote extends StatelessWidget {
   const ItemNote({Key? key, required this.data, required this.onClick})
@@ -37,7 +38,7 @@ class ItemNote extends StatelessWidget {
                   Container(
                     padding: EdgeInsets.only(left: 24, right: 20, top: 10),
                     alignment: Alignment.bottomLeft,
-                    child: Text(data.name,
+                    child: Text(data.title,
                         textAlign: TextAlign.center,
                         style: const TextStyle(
                             fontWeight: FontWeight.w500,
@@ -47,7 +48,7 @@ class ItemNote extends StatelessWidget {
                   Container(
                     padding: EdgeInsets.only(left: 24, right: 20, bottom: 20),
                     alignment: Alignment.bottomLeft,
-                    child: Text(data.description,
+                    child: Text(data.content,
                         textAlign: TextAlign.left,
                         style: const TextStyle(
                             fontWeight: FontWeight.normal,

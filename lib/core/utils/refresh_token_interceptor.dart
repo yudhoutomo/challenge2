@@ -1,6 +1,7 @@
 import 'dart:convert';
 import 'dart:io';
 
+import 'package:challenge2/ui/router.dart';
 import 'package:dio/dio.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_secure_storage/flutter_secure_storage.dart';
@@ -21,7 +22,7 @@ class RefreshTokenInterceptor extends QueuedInterceptorsWrapper {
   static const authTokenKey = 'AUTH_TOKEN';
   static const authRefreshTokenKey = 'AUTH_REFRESH_TOKEN';
   static const fcmTokenKey = 'FCM_TOKEN';
-  static const expiredMessage = 'token_not_valid';
+  static const expiredMessage = 'Invalid Token';
 
   RefreshTokenInterceptor(this._storage);
 
@@ -33,7 +34,7 @@ class RefreshTokenInterceptor extends QueuedInterceptorsWrapper {
       'platform': Platform.isAndroid ? 'android' : 'ios',
     };
     if (savedToken != null) {
-      headers['Authorization'] = 'Bearer $savedToken';
+      headers['Authorization'] = '$savedToken';
     }
     return handler.next(options.copyWith(headers: headers));
   }
@@ -55,23 +56,26 @@ class RefreshTokenInterceptor extends QueuedInterceptorsWrapper {
   @override
   void onError(DioError err, ErrorInterceptorHandler handler) async {
     debugPrint(err.response.toString());
+    debugPrint('dioErrorJalan');
     if (shouldRetry(err)) {
       try {
-        final reqBody = {'refresh': await _savedRefreshToken};
         final response = await Dio(
           BaseOptions(
-            baseUrl: Config.baseUrl,
-          ),
-        ).post('/api/refresh/', data: reqBody);
+              baseUrl: Config.baseUrl,
+              headers: {'Authorization': initialToken}),
+        ).get('/api/user/get-token');
         if (response.statusCode == HttpStatus.ok) {
           final body = response.data as Map<String, dynamic>;
-          await _storage.write(key: authTokenKey, value: body['access']);
+          await _storage.write(key: authTokenKey, value: body['token']);
+
+          debugPrint(body['token']);
           await retryRequest(err, handler);
         } else {
           return handler.reject(DioErrorWrapper(
               requestOptions: err.requestOptions, dioError: err));
         }
       } catch (e) {
+        debugPrint(err.message);
         return handler.reject(
             DioErrorWrapper(requestOptions: err.requestOptions, dioError: err));
       }
@@ -94,7 +98,9 @@ class RefreshTokenInterceptor extends QueuedInterceptorsWrapper {
       await _storage.read(key: authRefreshTokenKey);
 
   bool shouldRetry(DioError error) {
-    var message = error.response?.data?['code'];
+    var message = error.response?.data?['message'];
+    debugPrint('DioMessageError');
+    debugPrint(message);
     if (message is String) {
       return message.contains(expiredMessage);
     }
@@ -102,7 +108,7 @@ class RefreshTokenInterceptor extends QueuedInterceptorsWrapper {
   }
 
   Future<void> _saveToken(Map<String, dynamic> body) async {
-    await _storage.write(key: authTokenKey, value: body['access']);
+    await _storage.write(key: authTokenKey, value: body['token']);
     await _storage.write(key: authRefreshTokenKey, value: body['refresh']);
   }
 
@@ -112,8 +118,11 @@ class RefreshTokenInterceptor extends QueuedInterceptorsWrapper {
       'platform': Platform.isAndroid ? 'android' : 'ios',
     };
     if (token != null) {
-      headers['Authorization'] = 'Bearer $token';
+      headers['Authorization'] = '$token';
     }
+
+    debugPrint('savedToken');
+    debugPrint(token);
     final response = await Dio().fetch(err.requestOptions.copyWith(
       headers: headers,
     ));
