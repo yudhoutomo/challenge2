@@ -159,6 +159,6 @@ class ProfileScreen extends StatelessWidget {
 
   Future<void> setIsLogout() async {
     await getIt<FlutterSecureStorage>()
-        .write(key: Config.IS_LOGIN, value: null);
+        .write(key: 'USER_AUTH_KEY', value: null);
   }
 }

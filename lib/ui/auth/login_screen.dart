@@ -208,6 +208,6 @@ class LoginScreen extends StatelessWidget {
 
   Future<void> setIsLogin() async {
     await getIt<FlutterSecureStorage>()
-        .write(key: Config.IS_LOGIN, value: Config.IS_LOGIN);
+        .write(key: 'USER_AUTH_KEY', value: Config.IS_LOGIN);
   }
 }

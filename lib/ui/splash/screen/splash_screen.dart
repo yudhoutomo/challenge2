@@ -21,7 +21,7 @@ class _SplashScreenState extends State<SplashScreen> {
 
   Future<void> checkstate() async {
     var isLogin =
-        await getIt<FlutterSecureStorage>().read(key: Config.IS_LOGIN);
+        await getIt<FlutterSecureStorage>().read(key: 'USER_AUTH_KEY');
     debugPrint(isLogin);
     WidgetsBinding.instance.addPostFrameCallback((timeStamp) {
       Future.delayed(const Duration(seconds: 3),
